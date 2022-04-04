@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+USER_NAME="${USER_NAME:-wineuser}"
+USER_GROUP="${USER_GROUP:-wine}"
+USER_UID="${USER_UID:-1010}"
+USER_GID="${USER_GID:-1010}"
+USER_HOME="${USER_HOME:-/home/${USER_NAME}}"
+
+groupadd \
+    --gid "$USER_GID" \
+    "$USER_GROUP"
+
+useradd \
+    --comment "$USER_NAME" \
+    --uid "$USER_UID" \
+    --gid "$USER_GID" \
+    --home-dir "$USER_HOME" \
+    --shell /bin/bash \
+    "$USER_NAME"
+
+usermod \
+    --append \
+    --groups video,netdev \
+    "$USER_NAME"
+
+echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/user
+chmod 0440 /etc/sudoers.d/user
+
+chown "$USER_UID:$USER_GID" "$USER_HOME"
+
+exec gosu "$USER_NAME" "${@:-bash}"
