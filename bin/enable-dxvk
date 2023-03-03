@@ -2,6 +2,8 @@
 
 set -e
 
+wineboot
+
 mkdir -p /tmp/dxvk
 (
     cd /tmp/dxvk

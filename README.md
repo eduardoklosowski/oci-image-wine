@@ -18,14 +18,6 @@ O primeiro passo para criar um ambiente do Wine é iniciar um contêiner:
 ./run-wine-container
 ```
 
-A criação do ambiente pode ser feita com o comando:
-
-```sh
-winecfg
-```
-
-Durante a criação do ambiente será pedido para instalar as dependências do [Mono](https://www.mono-project.com/), é recomdável instar.
-
 Para habilitar o [DXVK](https://github.com/doitsujin/dxvk) (D3D9, D3D10 e D3D11 para Wine através do [Vulkan](https://www.vulkan.org/)) pode-se executar:
 
 ```sh
@@ -37,6 +29,8 @@ Para desabilitar o DXVK pode-se executar:
 ```sh
 disable-dxvk
 ```
+
+Durante a criação do ambiente será pedido para instalar as dependências do [Mono](https://www.mono-project.com/), é recomdável instar.
 
 ## Executar programa
 
