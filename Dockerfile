@@ -1,48 +1,25 @@
-# Aux
-
-FROM debian:bullseye-slim AS aux
+FROM debian:bookworm-slim
 
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         ca-certificates \
-        gpg \
-        jq \
-        wget \
     ; \
     rm -rf /var/lib/apt/lists/*
 
+ADD --chmod=644 https://dl.winehq.org/wine-builds/winehq.key /etc/apt/trusted.gpg.d/winehq.asc
 RUN set -eux; \
-    wget -nv -O - "https://dl.winehq.org/wine-builds/winehq.key" \
-        | gpg --dearmor -o /winehq.gpg; \
-    wget -nv -O /dxvk.tar.gz \
-        "$(wget -qO - https://api.github.com/repos/doitsujin/dxvk/releases \
-               | jq -r '.[]|select(.tag_name == "v1.10.3").assets[0].browser_download_url')"
-
-
-# Image
-
-FROM debian:bullseye-slim
-
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-        ca-certificates \
-        gosu \
-        sudo \
-    ; \
-    rm -rf /var/lib/apt/lists/*
-
-COPY --from=aux /winehq.gpg /etc/apt/trusted.gpg.d/winehq.gpg
-RUN set -eux; \
+    echo "deb https://dl.winehq.org/wine-builds/debian/ $(sed -rn 's/^VERSION_CODENAME=//p' /etc/os-release) main" > /etc/apt/sources.list.d/winehq.list; \
     dpkg --add-architecture i386; \
-    echo "deb https://dl.winehq.org/wine-builds/debian/ bullseye main" \
-        > /etc/apt/sources.list.d/winehq.list; \
     apt-get update; \
-    apt-get install -y --install-recommends winehq-stable; \
+    apt-get install -y --no-install-recommends \
+        winehq-stable \
+        mesa-vulkan-drivers:amd64 \
+        mesa-vulkan-drivers:i386 \
+        libgl1:amd64 \
+        libgl1:i386 \
+    ; \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=aux /dxvk.tar.gz /
-COPY bin/* /usr/local/bin/
-
-ENTRYPOINT ["/usr/local/bin/entrypoint"]
+ADD --chmod=644 https://github.com/doitsujin/dxvk/releases/download/v2.3/dxvk-2.3.tar.gz /dxvk.tar.gz
+COPY bin/setup-dxvk /usr/local/bin/setup-dxvk

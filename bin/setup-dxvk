@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    install)
+        ;;
+    uninstall)
+        ;;
+    *)
+        echo "Usage: $0 {install|uninstall}" >&2
+        exit 1
+esac
+
+if [ -n "$WINEPREFIX" ] && ! [ -f "$WINEPREFIX/system.reg" ]; then
+    echo "$WINEPREFIX is not a wine prefix" >&2
+    exit 1
+fi
+
+export WINEDEBUG=-all
+export WINEDLLOVERRIDES='mscoree,mshtml='
+
+wineboot -u
+
+WIN32_SYS_PATH="$(wine winepath -u 'C:\windows\system32')"
+WIN64_SYS_PATH="$(wine64 winepath -u 'C:\windows\system32')"
+
+[ -d /tmp/dxvk ] && rm -rf /tmp/dxvk
+mkdir /tmp/dxvk
+tar xf /dxvk.tar.gz --strip-components=1 -C /tmp/dxvk
+
+case "$1" in
+    install)
+        ls /tmp/dxvk/x32 | while read -r f; do
+            [ -e "$WIN32_SYS_PATH/$f" -a ! -e "$WIN32_SYS_PATH/$f.orig" ] && cp "$WIN32_SYS_PATH/$f" "$WIN32_SYS_PATH/$f.orig"
+            mv "/tmp/dxvk/x32/$f" "$WIN32_SYS_PATH/$f"
+            wine reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v "${f/%.dll/}" /d native /f >/dev/null 2>&1
+        done
+        ls /tmp/dxvk/x64 | while read -r f; do
+            [ -e "$WIN64_SYS_PATH/$f" -a ! -e "$WIN64_SYS_PATH/$f.orig" ] && cp "$WIN64_SYS_PATH/$f" "$WIN64_SYS_PATH/$f.orig"
+            mv "/tmp/dxvk/x64/$f" "$WIN64_SYS_PATH/$f"
+        done
+        ;;
+    uninstall)
+        ls /tmp/dxvk/x32 | while read -r f; do
+            [ -e "$WIN32_SYS_PATH/$f.orig" ] && mv "$WIN32_SYS_PATH/$f.orig" "$WIN32_SYS_PATH/$f"
+            wine reg delete 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v "${f/%.dll/}" /f >/dev/null 2>&1
+        done
+        ls /tmp/dxvk/x64 | while read -r f; do
+            [ -e "$WIN64_SYS_PATH/$f.orig" ] && mv "$WIN64_SYS_PATH/$f.orig" "$WIN64_SYS_PATH/$f"
+        done
+        wineboot -u
+        ;;
+esac
+
+rm -rf /tmp/dxvk

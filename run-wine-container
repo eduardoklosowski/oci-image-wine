@@ -2,34 +2,48 @@
 
 set -e
 
-WINE_NAME="${WINE_NAME:-docker-wine}"
-WINE_ENV_VOLUME="${WINE_ENV_VOLUME:-$HOME/.wine_env/$WINE_NAME}"
+CONTAINER_CLI="$(which podman || :)"
+[ -z "$CONTAINER_CLI" ] && CONTAINER_CLI="$(which docker || :)"
+if [ -z "$CONTAINER_CLI" ]; then
+    echo 'ERROR: podman and docker not found' >&2
+    exit 1
+fi
 
+CONTAINER_ARGS=""
+while [ -n "$1" ]; do
+    if echo "$1" | grep -q -E '^-'; then
+        CONTAINER_ARGS="$CONTAINER_ARGS $1"
+        shift
+    else
+        break
+    fi
+done
+
+WINE_NAME="${WINE_NAME:-wine-default}"
+WINE_ENV_VOLUME="${WINE_ENV_VOLUME:-$HOME/.wine_env/$WINE_NAME}"
 [ -d "$WINE_ENV_VOLUME" ] || mkdir -p "$WINE_ENV_VOLUME"
 
-docker run -it --rm \
+"$CONTAINER_CLI" run -it --rm \
     --name="$WINE_NAME" \
     --hostname="$(hostname)" \
     --shm-size="1g" \
-    --env="USER_NAME=$(id -un)" \
-    --env="USER_GROUP=$(id -gn)" \
-    --env="USER_UID=$(id -u)" \
-    --env="USER_GID=$(id -g)" \
-    --env="USER_HOME=$HOME" \
-    --workdir="$HOME" \
     --volume="/etc/localtime:/etc/localtime:ro" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:ro" \
     --env="DISPLAY" \
     --volume="$HOME/.Xauthority:/tmp/.Xauthority:ro" \
     --env="XAUTHORITY=/tmp/.Xauthority" \
     --device="/dev/dri" \
-    --volume="/run/user/$(id -u)/pulse/native:/tmp/pulse.sock" \
+    --volume="/run/user/$(id -u)/pulse/native:/tmp/pulse.sock:ro" \
     --env="PULSE_SERVER=unix:/tmp/pulse.sock" \
     --volume="$HOME/.config/pulse/cookie:/tmp/pulse.cookie:ro" \
     --env="PULSE_COOKIE=/tmp/pulse.cookie" \
-    --env="WINEDEBUG=-all" \
-    --env="WINEARCH=win32" \
-    --env="WINEPREFIX=$HOME/.wine" \
+    --volume="$WINE_ENV_VOLUME:/volume" \
+    --env="WINEPREFIX=/volume/.wine" \
+    --env="WINEDEBUG=fixme-all" \
+    --env="DXVK_LOG_PATH=none" \
     --env="DXVK_FRAME_RATE=60" \
-    --volume="$WINE_ENV_VOLUME:$HOME" \
-    docker-wine:bullseye "$@"
+    --env="DXVK_HUD=compiler" \
+    --env="HOME=/volume" \
+    --workdir="/volume" \
+    $CONTAINER_ARGS \
+    wine:latest "$@"
