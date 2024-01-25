@@ -18,6 +18,11 @@ RUN set -eux; \
         mesa-vulkan-drivers:i386 \
         libgl1:amd64 \
         libgl1:i386 \
+        gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good \
+        gstreamer1.0-plugins-ugly \
+        gstreamer1.0-libav \
+        gstreamer1.0-x \
     ; \
     rm -rf /var/lib/apt/lists/*
 
