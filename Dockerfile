@@ -23,6 +23,7 @@ RUN set -eux; \
         gstreamer1.0-plugins-ugly \
         gstreamer1.0-libav \
         gstreamer1.0-x \
+        joystick \
     ; \
     rm -rf /var/lib/apt/lists/*
 

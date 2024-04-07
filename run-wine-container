@@ -19,6 +19,11 @@ while [ -n "$1" ]; do
     fi
 done
 
+JS_SERIAIS="${JS_SERIAIS:-}"
+for serial in $JS_SERIAIS; do
+    CONTAINER_ARGS="${CONTAINER_ARGS} `find /dev/input/by-id -name "*_${serial}-*" -exec realpath {} + | sed -r 's/.*/--device="\0"/' | xargs`"
+done
+
 WINE_NAME="${WINE_NAME:-wine-default}"
 WINE_ENV_VOLUME="${WINE_ENV_VOLUME:-$HOME/.wine_env/$WINE_NAME}"
 [ -d "$WINE_ENV_VOLUME" ] || mkdir -p "$WINE_ENV_VOLUME"
