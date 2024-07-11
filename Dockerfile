@@ -27,5 +27,5 @@ RUN set -eux; \
     ; \
     rm -rf /var/lib/apt/lists/*
 
-ADD --chmod=644 https://github.com/doitsujin/dxvk/releases/download/v2.3.1/dxvk-2.3.1.tar.gz /dxvk.tar.gz
+ADD --chmod=644 https://github.com/doitsujin/dxvk/releases/download/v2.4/dxvk-2.4.tar.gz /dxvk.tar.gz
 COPY bin/setup-dxvk /usr/local/bin/setup-dxvk
