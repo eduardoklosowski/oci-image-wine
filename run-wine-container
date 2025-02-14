@@ -19,14 +19,9 @@ while [ -n "$1" ]; do
     fi
 done
 
-JS_SERIAIS="${JS_SERIAIS:-}"
-for serial in $JS_SERIAIS; do
-    CONTAINER_ARGS="${CONTAINER_ARGS} `find /dev/input/by-id -name "*_${serial}-*" -exec realpath {} + | sed -r 's/.*/--device="\0"/' | xargs`"
-done
-
 WINE_NAME="${WINE_NAME:-wine-default}"
+WINE_IMAGE="${WINE_IMAGE:-wine:latest}"
 WINE_ENV_VOLUME="${WINE_ENV_VOLUME:-$HOME/.wine_env/$WINE_NAME}"
-[ -d "$WINE_ENV_VOLUME" ] || mkdir -p "$WINE_ENV_VOLUME"
 
 "$CONTAINER_CLI" run -it --rm \
     --name="$WINE_NAME" \
@@ -35,20 +30,21 @@ WINE_ENV_VOLUME="${WINE_ENV_VOLUME:-$HOME/.wine_env/$WINE_NAME}"
     --volume="/etc/localtime:/etc/localtime:ro" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:ro" \
     --env="DISPLAY" \
-    --volume="$HOME/.Xauthority:/tmp/.Xauthority:ro" \
+    --volume="${XAUTHORITY:-$HOME/.Xauthority}:/tmp/.Xauthority:ro" \
     --env="XAUTHORITY=/tmp/.Xauthority" \
     --device="/dev/dri" \
     --volume="/run/user/$(id -u)/pulse/native:/tmp/pulse.sock:ro" \
     --env="PULSE_SERVER=unix:/tmp/pulse.sock" \
-    --volume="$HOME/.config/pulse/cookie:/tmp/pulse.cookie:ro" \
+    --volume="${PULSE_COOKIE:-$HOME/.config/pulse/cookie}:/tmp/pulse.cookie:ro" \
     --env="PULSE_COOKIE=/tmp/pulse.cookie" \
-    --volume="$WINE_ENV_VOLUME:/volume" \
-    --env="WINEPREFIX=/volume/.wine" \
+    --device="/dev/input" \
+    --volume="$WINE_ENV_VOLUME:/data" \
+    --env="HOME=/data" \
+    --workdir="/data" \
+    --env="WINEPREFIX=/data/.wine" \
     --env="WINEDEBUG=fixme-all" \
     --env="DXVK_LOG_PATH=none" \
     --env="DXVK_FRAME_RATE=60" \
     --env="DXVK_HUD=compiler" \
-    --env="HOME=/volume" \
-    --workdir="/volume" \
     $CONTAINER_ARGS \
-    wine:latest "$@"
+    "$WINE_IMAGE" "$@"

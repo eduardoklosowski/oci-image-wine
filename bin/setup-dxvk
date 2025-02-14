@@ -12,9 +12,11 @@ case "$1" in
         exit 1
 esac
 
-if [ -n "$WINEPREFIX" ] && ! [ -f "$WINEPREFIX/system.reg" ]; then
-    echo "$WINEPREFIX is not a wine prefix" >&2
-    exit 1
+if [ -n "$WINEPREFIX" ]; then
+    if ! [ -f "$WINEPREFIX/system.reg" ] && ! [ "$(ls -1 "$WINEPREFIX" 2>/dev/null | wc -l)" -eq 0 ]; then
+      echo "$WINEPREFIX is not a wine prefix" >&2
+      exit 1
+    fi
 fi
 
 export WINEDEBUG=-all
@@ -27,7 +29,7 @@ WIN64_SYS_PATH="$(wine64 winepath -u 'C:\windows\system32')"
 
 [ -d /tmp/dxvk ] && rm -rf /tmp/dxvk
 mkdir /tmp/dxvk
-tar xf /dxvk.tar.gz --strip-components=1 -C /tmp/dxvk
+tar -xf /usr/lib/dxvk/dxvk.tar.gz --strip-components=1 -C /tmp/dxvk
 
 case "$1" in
     install)

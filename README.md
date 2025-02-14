@@ -7,7 +7,7 @@ Imagem [OCI](https://opencontainers.org/) para rodar programas com [Wine](https:
 A imagem pode ser gerada diretamente do código no GitHub executando:
 
 ```sh
-podman build -t wine 'https://github.com/eduardoklosowski/oci-image-wine.git#main'
+docker build -t wine 'https://github.com/eduardoklosowski/oci-image-wine.git#main'
 ```
 
 ## Criar Ambiente Wine
