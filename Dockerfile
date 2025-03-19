@@ -32,7 +32,7 @@ RUN set -eux; \
     wget -nv -O/winehq.asc https://dl.winehq.org/wine-builds/winehq.key; \
     echo "deb [signed-by=/etc/apt/keyrings/winehq.asc] https://dl.winehq.org/wine-builds/debian/ $(sed -rn 's/^VERSION_CODENAME=//p' /etc/os-release) main" > /winehq.list
 
-RUN wget -nv -O/dxvk.tar.gz https://github.com/doitsujin/dxvk/releases/download/v2.5.3/dxvk-2.5.3.tar.gz
+RUN wget -nv -O/dxvk.tar.gz https://github.com/doitsujin/dxvk/releases/download/v2.6/dxvk-2.6.tar.gz
 
 
 # Image
