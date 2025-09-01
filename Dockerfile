@@ -1,6 +1,6 @@
 # Base
 
-FROM debian:bookworm-slim AS base
+FROM debian:trixie-slim AS base
 
 RUN set -eux; \
     apt-get update; \
