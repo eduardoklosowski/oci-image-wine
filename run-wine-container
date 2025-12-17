@@ -44,7 +44,8 @@ WINE_ENV_VOLUME="${WINE_ENV_VOLUME:-$HOME/.wine_env/$WINE_NAME}"
     --env="WINEPREFIX=/data/.wine" \
     --env="WINEDEBUG=fixme-all" \
     --env="DXVK_LOG_PATH=none" \
-    --env="DXVK_FRAME_RATE=60" \
     --env="DXVK_HUD=compiler" \
+    --env="MANGOHUD=1" \
+    --env="MANGOHUD_CONFIG=fps_limit=60+30+0,no_display,cpu_temp,cpu_mhz,gpu_temp,gpu_core_clock,procmem,procmem_shared,procmem_virt,ram,proc_vram,vram,show_fps_limit" \
     $CONTAINER_ARGS \
     "$WINE_IMAGE" "$@"

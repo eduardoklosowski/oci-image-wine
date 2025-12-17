@@ -34,6 +34,8 @@ RUN set -eux; \
 
 RUN wget -nv -O/dxvk.tar.gz https://github.com/doitsujin/dxvk/releases/download/v2.7.1/dxvk-2.7.1.tar.gz
 
+RUN wget -nv -O/mangohud.tar.gz https://github.com/flightlessmango/MangoHud/releases/download/v0.8.2/MangoHud-0.8.2.r0.ga37b007.tar.gz
+
 
 # Image
 
@@ -69,3 +71,13 @@ RUN set -eux; \
 
 COPY --from=aux /dxvk.tar.gz /usr/lib/dxvk/dxvk.tar.gz
 COPY bin/setup-dxvk /usr/local/bin/setup-dxvk
+
+COPY --from=aux /mangohud.tar.gz /usr/local/mangohud.tar.gz
+RUN set -eux; \
+    mkdir /tmp/mangohud; \
+    cd /tmp/mangohud; \
+    tar -xf /usr/local/mangohud.tar.gz --strip-components=1; \
+    tar -xf MangoHud-package.tar; \
+    ./mangohud-setup.sh install; \
+    cd -; \
+    rm -rf /tmp/mangohud
